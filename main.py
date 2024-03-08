@@ -71,7 +71,8 @@ synthesiser = pipeline(
 speech = synthesiser(script, forward_params={"do_sample": True})
 print("Audio Generated")
 audio = speech["audio"].flatten()
-audio = np.interp(audio, (audio.min(), audio.max()), (0, 65535))
-scipy.io.wavfile.write(os.path.join("Podcast Generator", "episode_audio", f"{filename}.wav"), rate=speech["sampling_rate"], data=audio)
+#audio = np.interp(audio, (audio.min(), audio.max()), (0, 65535))
+np.save(os.path.join("Podcast Generator", "episode_audio", f"{filename}.npy"), audio)
+scipy.io.wavfile.write(os.path.join("Podcast Generator", "episode_audio", f"{filename}.wav"), rate=speech["sampling_rate"], data=audio.astype(np.float32))
 print("Audio Saved")
 
