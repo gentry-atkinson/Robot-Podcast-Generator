@@ -9,6 +9,7 @@ import os
 from datetime import datetime
 import gc
 from datasets import load_dataset
+import numpy as np
 
 # Setup
 USE_CPU = False
@@ -49,7 +50,7 @@ outputs = pipe(
 script = outputs[0]["generated_text"][-1]["content"]
 filename = f"episode_{datetime.now()}"
 
-with open(os.path.join("Podcast Generator", "scripts", f"episode_{datetime.now()}.txt"), 'w+') as f:
+with open(os.path.join("Podcast Generator", "scripts", f"{filename}.txt"), 'w+') as f:
     f.write(script)
 
 del pipe
@@ -69,6 +70,8 @@ synthesiser = pipeline(
 
 speech = synthesiser(script, forward_params={"do_sample": True})
 print("Audio Generated")
-scipy.io.wavfile.write(os.path.join("Podcast Generator", "scripts", f"episode_{datetime.now()}.wav"), rate=speech["sampling_rate"], data=speech["audio"])
+audio = speech["audio"].flatten()
+audio = np.interp(audio, (audio.min(), audio.max()), (0, 65535))
+scipy.io.wavfile.write(os.path.join("Podcast Generator", "episode_audio", f"{filename}.wav"), rate=speech["sampling_rate"], data=audio)
 print("Audio Saved")
 
