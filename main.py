@@ -53,6 +53,7 @@ outputs = pipe(
 #Get a title for the episode
 
 title = outputs[0]["generated_text"][-1]["content"]
+print(f"Episode title: {title}")
 
 #Generate Script text from several prompts
 
@@ -62,7 +63,7 @@ all_segments = ["Tech_Tales", "AI_Q_and_A", "AI_Fails", "Future_Forcast",
 
 segments = ["Introduction"]
 segments.extend(random.sample(all_segments, 4))
-segments.extend(["Today's Sponsor", "Conclusion"])
+segments.extend(["Todays_Sponsor", "Conclusion"])
 
 for segment in segments:
 
@@ -74,7 +75,7 @@ for segment in segments:
         "role": "system",
         "content": "You are a funny and exciting podcast host.",
     },
-    {"role": "user", "content": f"{title_prompt}"},
+    {"role": "user", "content": f"{input_text}"},
     ]
     outputs = pipe(
         messages,
@@ -85,17 +86,21 @@ for segment in segments:
         top_p=0.95,
         stop_sequence="<|im_end|>",
     )
-    scrip_segment = outputs[0]["generated_text"][-1]["content"]
+    script_segment = outputs[0]["generated_text"][-1]["content"]
+    print(f"{segment} generated. {len(script_segment)} characters")
+    script += "\n"
+    script += script_segment
 
 with open(os.path.join("Podcast Generator", "scripts", f"{filename}.txt"), 'w+') as f:
     f.write(script)
+print(f"Script finished. Total length: {len(script.split(' '))} words")
+
+#Clean up models for memory
 
 del pipe
 del outputs
 del messages
 gc.collect()
-
-print("Script Generated")
 
 # Convert Script to Audio
 from transformers import pipeline
