@@ -10,6 +10,7 @@ from datetime import datetime
 import gc
 from datasets import load_dataset
 import numpy as np
+import random
 
 # Setup
 USE_CPU = False
@@ -19,11 +20,12 @@ if torch.cuda.is_available() and not USE_CPU:
 else:
     device = "cpu"
 
-# Generate a script from a prompt
+# Setup
 
-input_text = "Write a new birthday song."
-with open(os.path.join("Podcast Generator","prompt.txt")) as f:
-    input_text = f.read()
+input_text = ""
+filename = f"episode_{datetime.now()}"
+title_prompt = "Generate a title for one episode of a podcast that is name 'No Humans Made this Podcast'. This podcast is about AI and society. The title should be fun and witty."
+script = ""
 
 pipe = pipeline(
     "text-generation",
@@ -36,19 +38,54 @@ messages = [
         "role": "system",
         "content": "You are a funny and exciting podcast host.",
     },
-    {"role": "user", "content": f"{input_text}"},
+    {"role": "user", "content": f"{title_prompt}"},
 ]
 outputs = pipe(
     messages,
-    max_new_tokens=102400,
+    max_new_tokens=1024,
     do_sample=True,
     temperature=0.7,
     top_k=50,
     top_p=0.95,
     stop_sequence="<|im_end|>",
 )
-script = outputs[0]["generated_text"][-1]["content"]
-filename = f"episode_{datetime.now()}"
+
+#Get a title for the episode
+
+title = outputs[0]["generated_text"][-1]["content"]
+
+#Generate Script text from several prompts
+
+all_segments = ["Tech_Tales", "AI_Q_and_A", "AI_Fails", "Future_Forcast", 
+                "AI_and_Pop_Culture", "Tech_Trivia", "Listener_Stories"
+                ]
+
+segments = ["Introduction"]
+segments.extend(random.sample(all_segments, 4))
+segments.extend(["Today's Sponsor", "Conclusion"])
+
+for segment in segments:
+
+    with open(os.path.join("Podcast Generator",f"{segment}_prompt.txt")) as f:
+        input_text = f.read()
+    input_text.replace("{title}", title)
+    messages = [
+    {
+        "role": "system",
+        "content": "You are a funny and exciting podcast host.",
+    },
+    {"role": "user", "content": f"{title_prompt}"},
+    ]
+    outputs = pipe(
+        messages,
+        max_new_tokens=5096,
+        do_sample=True,
+        temperature=0.7,
+        top_k=50,
+        top_p=0.95,
+        stop_sequence="<|im_end|>",
+    )
+    scrip_segment = outputs[0]["generated_text"][-1]["content"]
 
 with open(os.path.join("Podcast Generator", "scripts", f"{filename}.txt"), 'w+') as f:
     f.write(script)
@@ -70,7 +107,8 @@ synthesiser = pipeline(
 
 speech = synthesiser(script, forward_params={"do_sample": True})
 print("Audio Generated")
-audio = speech["audio"].flatten()
+audio = speech["audio"]
+audio = np.moveaxis(audio, -1, 0)
 #audio = np.interp(audio, (audio.min(), audio.max()), (0, 65535))
 np.save(os.path.join("Podcast Generator", "episode_audio", f"{filename}.npy"), audio)
 scipy.io.wavfile.write(os.path.join("Podcast Generator", "episode_audio", f"{filename}.wav"), rate=speech["sampling_rate"], data=audio.astype(np.float32))
