@@ -3,7 +3,7 @@
 # Date: 07 Mar, 2024
 
 
-from transformers import pipeline
+from transformers import pipeline, AutoProcessor, BarkModel
 import torch
 import os
 from datetime import datetime
@@ -16,7 +16,7 @@ import random
 USE_CPU = False
 
 if torch.cuda.is_available() and not USE_CPU:
-    device = "cuda:1"
+    device = "cuda"
 else:
     device = "cpu"
 
@@ -24,8 +24,10 @@ else:
 
 input_text = ""
 filename = f"episode_{datetime.now()}"
-title_prompt = "Generate a title for one episode of a podcast that is name 'No Humans Made this Podcast'. This podcast is about AI and society. The title should be fun and witty."
+title_prompt = "Generate a title for one episode of a podcast that is name 'No Humans Were Involved with This Podcast'. This podcast is about AI and society. The title should be fun and witty."
 script = ""
+
+torch.cuda.init()
 
 pipe = pipeline(
     "text-generation",
@@ -69,7 +71,7 @@ for segment in segments:
 
     with open(os.path.join("Podcast Generator",f"{segment}_prompt.txt")) as f:
         input_text = f.read()
-    input_text.replace("{title}", title)
+    input_text = input_text.replace("{title}", title)
     messages = [
     {
         "role": "system",
@@ -106,16 +108,29 @@ gc.collect()
 from transformers import pipeline
 import scipy
 
-synthesiser = pipeline(
-    "text-to-speech", "suno/bark",
-)
+processor = AutoProcessor.from_pretrained("suno/bark")
+model = BarkModel.from_pretrained("suno/bark")
+voice_preset = "v2/en_speaker_6"
 
-speech = synthesiser(script, forward_params={"do_sample": True})
-print("Audio Generated")
-audio = speech["audio"]
-audio = np.moveaxis(audio, -1, 0)
-#audio = np.interp(audio, (audio.min(), audio.max()), (0, 65535))
-np.save(os.path.join("Podcast Generator", "episode_audio", f"{filename}.npy"), audio)
-scipy.io.wavfile.write(os.path.join("Podcast Generator", "episode_audio", f"{filename}.wav"), rate=speech["sampling_rate"], data=audio.astype(np.float32))
+all_audio = np.zeros((200, 1))
+for i, line in enumerate(script.split('\n')):
+    if line in ["", " ", "\n", " \n"]:
+        continue
+    inputs = processor(line, voice_preset=voice_preset)
+    audio = model.generate(**inputs)
+    audio = audio.cpu().numpy()
+    #Channels Last
+    audio = np.moveaxis(audio, -1, 0)
+    all_audio = np.concatenate((all_audio, audio), axis=0)
+    all_audio = np.concatenate((np.zeros((5, 1)), audio), axis=0)
+    print(f"Line {i} read")
+
+# Save audio as wav and as numpy just in case
+sample_rate = model.generation_config.sample_rate
+np.save(os.path.join("Podcast Generator", "episode_audio", f"{filename}.npy"), all_audio)
+scipy.io.wavfile.write(
+    os.path.join("Podcast Generator", "episode_audio", f"{filename}.wav"), 
+    rate=sample_rate, data=all_audio.astype(np.float32)
+)
 print("Audio Saved")
 
