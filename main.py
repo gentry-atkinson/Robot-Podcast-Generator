@@ -95,7 +95,8 @@ if __name__ == "__main__":
 
     with open(os.path.join("Podcast Generator", "scripts", f"{filename}.txt"), 'w+') as f:
         f.write('\n'.join(script.values()))
-    print(f"Script finished. Total length: {len(script.split(' '))} words")
+    #print(f"Script finished. Total length: {len(script.split(' '))} words")
+    print("Script finished.")
 
 
     #Clean up models for memory
@@ -115,14 +116,15 @@ if __name__ == "__main__":
     all_audio = np.zeros((200, 1))
 
     for title, text in script.items():
+        print(f"Reading segment {title}")
         if title != "Introduction":
-            all_audio = np.concatenate((np.zeros((50, 1)), audio), axis=0)
+            all_audio = np.concatenate((all_audio, np.zeros((50, 1))), axis=0)
             inputs = processor(f"Coming up we have {title}", voice_preset=voice_preset)
             audio = model.generate(**inputs)
             audio = audio.cpu().numpy()
             audio = np.moveaxis(audio, -1, 0)
             all_audio = np.concatenate((all_audio, audio), axis=0)
-            all_audio = np.concatenate((np.zeros((5, 1)), audio), axis=0)
+            all_audio = np.concatenate((all_audio, np.zeros((5, 1))), axis=0)
         for i, line in enumerate(text.split('\n')):
             if line in ["", " ", "\n", " \n"]:
                 continue
@@ -133,7 +135,7 @@ if __name__ == "__main__":
             #Channels Last
             audio = np.moveaxis(audio, -1, 0)
             all_audio = np.concatenate((all_audio, audio), axis=0)
-            all_audio = np.concatenate((np.zeros((5, 1)), audio), axis=0)
+            all_audio = np.concatenate((all_audio, np.zeros((5, 1))), axis=0)
             print(f"Line {i} read")
 
     # Save audio as wav and as numpy just in case
