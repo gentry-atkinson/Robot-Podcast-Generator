@@ -13,6 +13,8 @@ import numpy as np
 import random
 import scipy
 
+from gen_music import generate_theme_song
+
 if __name__ == "__main__":
     # Setup
     USE_CPU = False
@@ -112,8 +114,15 @@ if __name__ == "__main__":
     model = BarkModel.from_pretrained("suno/bark")
     # model.to(device)
     # processor.to(device)
+    all_audio = np.zeros((50, 1))
     voice_preset = "v2/en_speaker_6"
-    all_audio = np.zeros((200, 1))
+    if not os.path.isfile(os.path.join("Podcast Generator", "tunes", "shortened_themesong.npy")):
+        generate_theme_song()
+    theme = np.load(os.path.join("Podcast Generator", "tunes", "shortened_themesong.npy"))
+    #Channels last
+    if theme.ndim != 2:
+        theme = np.reshape(theme, (len(theme), 1))
+    all_audio = np.concatenate((all_audio, theme), axis=0)
 
     for title, text in script.items():
         print(f"Reading segment {title}")
