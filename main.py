@@ -94,7 +94,7 @@ if __name__ == "__main__":
         script[segment] = script_segment
 
     with open(os.path.join("Podcast Generator", "scripts", f"{filename}.txt"), 'w+') as f:
-        f.write(script)
+        f.write('\n'.join(script.values()))
     print(f"Script finished. Total length: {len(script.split(' '))} words")
 
 
@@ -123,7 +123,7 @@ if __name__ == "__main__":
             audio = np.moveaxis(audio, -1, 0)
             all_audio = np.concatenate((all_audio, audio), axis=0)
             all_audio = np.concatenate((np.zeros((5, 1)), audio), axis=0)
-        for i, line in enumerate(script[text].split('\n')):
+        for i, line in enumerate(text.split('\n')):
             if line in ["", " ", "\n", " \n"]:
                 continue
             # line = torch.as_tensor(line).to(device)

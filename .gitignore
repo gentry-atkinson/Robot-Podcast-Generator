@@ -1,2 +1,4 @@
 scripts/*
 episode_audio/*
+tunes/*
+**.pyc
