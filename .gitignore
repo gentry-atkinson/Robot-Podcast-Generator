@@ -2,3 +2,4 @@ scripts/*
 episode_audio/*
 tunes/*
 **.pyc
+logging.txt

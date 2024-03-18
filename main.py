@@ -12,8 +12,12 @@ from datasets import load_dataset
 import numpy as np
 import random
 import scipy
+import logging
 
 from gen_music import generate_theme_song
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(filename='Podcast Generator/logging.txt', level=logging.DEBUG)
 
 if __name__ == "__main__":
     # Setup
@@ -58,7 +62,7 @@ if __name__ == "__main__":
     #Get a title for the episode
 
     title = outputs[0]["generated_text"][-1]["content"]
-    print(f"Episode title: {title}")
+    logger.info(f"Episode title: {title}")
 
     #Generate Script text from several prompts
 
@@ -92,13 +96,13 @@ if __name__ == "__main__":
             stop_sequence="<|im_end|>",
         )
         script_segment = outputs[0]["generated_text"][-1]["content"]
-        print(f"{segment} generated. {len(script_segment)} characters")
+        logger.info(f"{segment} generated. {len(script_segment)} characters")
         script[segment] = script_segment
 
     with open(os.path.join("Podcast Generator", "scripts", f"{filename}.txt"), 'w+') as f:
         f.write('\n'.join(script.values()))
     #print(f"Script finished. Total length: {len(script.split(' '))} words")
-    print("Script finished.")
+    logger.info("Script finished.")
 
 
     #Clean up models for memory
@@ -125,7 +129,7 @@ if __name__ == "__main__":
     all_audio = np.concatenate((all_audio, theme), axis=0)
 
     for title, text in script.items():
-        print(f"Reading segment {title}")
+        logger.info(f"Reading segment {title}")
         if title != "Introduction":
             all_audio = np.concatenate((all_audio, np.zeros((50, 1))), axis=0)
             inputs = processor(f"Coming up we have {title}", voice_preset=voice_preset)
@@ -145,7 +149,7 @@ if __name__ == "__main__":
             audio = np.moveaxis(audio, -1, 0)
             all_audio = np.concatenate((all_audio, audio), axis=0)
             all_audio = np.concatenate((all_audio, np.zeros((5, 1))), axis=0)
-            print(f"Line {i} read")
+            logger.info(f"Line {i} read")
 
     # Save audio as wav and as numpy just in case
     sample_rate = model.generation_config.sample_rate
@@ -154,5 +158,5 @@ if __name__ == "__main__":
         os.path.join("Podcast Generator", "episode_audio", f"{filename}.wav"), 
         rate=sample_rate, data=all_audio.astype(np.float32)
     )
-    print("Audio Saved")
+    logger.info("Audio Saved")
 
