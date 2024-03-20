@@ -32,7 +32,6 @@ def break_text(orig_text: str) -> str:
                 line = line[:break_point] + '\n' + line[break_point+1:]
         new_text += line
         new_text += '\n'
-    print(new_text)
     return new_text
             
 
@@ -148,8 +147,8 @@ if __name__ == "__main__":
         generate_transistion_song()
     transition = np.load(os.path.join("Podcast Generator", "tunes", "shortened_transition.npy"))
     #Channels last
-    if theme.ndim != 2:
-        theme = np.reshape(theme, (len(theme), 1))
+    if transition.ndim != 2:
+        transition = np.reshape(transition, (len(transition), 1))
 
     for title, text in script.items():
         logger.info(f"Reading segment {title}")
@@ -163,7 +162,7 @@ if __name__ == "__main__":
             all_audio = np.concatenate((all_audio, audio), axis=0)
             all_audio = np.concatenate((all_audio, np.zeros((50, 1))), axis=0)
         for i, line in enumerate(text.split('\n')):
-            if line in ["", " ", "\n", " \n"]:
+            if line in ["", " ", "\n", " \n"] or not any([c.isalpha() for c in line]):
                 continue
             # line = torch.as_tensor(line).to(device)
             inputs = processor(line, voice_preset=voice_preset)
