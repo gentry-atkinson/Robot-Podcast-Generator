@@ -14,7 +14,7 @@ import random
 import scipy
 import logging
 
-from gen_music import generate_theme_song
+from gen_music import generate_theme_song, generate_transistion_song
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(filename='Podcast Generator/logging.txt', level=logging.DEBUG)
@@ -30,7 +30,7 @@ if __name__ == "__main__":
 
     input_text = ""
     filename = f"episode_{datetime.now()}"
-    title_prompt = "Generate a title for one episode of a podcast that is named 'No Humans Were Involved with This Podcast'. This podcast is about AI and society. The title should be fun and witty."
+    title_prompt = "Generate a title for one episode of a podcast that is named 'No Humans Were Involved with This Podcast'. This podcast is about AI and society. The title should be short and humorous."
     script = {}
 
     # This isn't necesary. I just think it's neat.
@@ -116,10 +116,9 @@ if __name__ == "__main__":
 
     processor = AutoProcessor.from_pretrained("suno/bark")
     model = BarkModel.from_pretrained("suno/bark")
-    # model.to(device)
-    # processor.to(device)
     all_audio = np.zeros((50, 1))
-    voice_preset = "v2/en_speaker_6"
+    # original was speaker 6
+    voice_preset = "v2/en_speaker_2"
     if not os.path.isfile(os.path.join("Podcast Generator", "tunes", "shortened_themesong.npy")):
         generate_theme_song()
     theme = np.load(os.path.join("Podcast Generator", "tunes", "shortened_themesong.npy"))
@@ -128,16 +127,24 @@ if __name__ == "__main__":
         theme = np.reshape(theme, (len(theme), 1))
     all_audio = np.concatenate((all_audio, theme), axis=0)
 
+    if not os.path.isfile(os.path.join("Podcast Generator", "tunes", "shortened_transition.npy")):
+        generate_theme_song()
+    transition = np.load(os.path.join("Podcast Generator", "tunes", "shortened_transition.npy"))
+    #Channels last
+    if theme.ndim != 2:
+        theme = np.reshape(theme, (len(theme), 1))
+
     for title, text in script.items():
         logger.info(f"Reading segment {title}")
         if title != "Introduction":
             all_audio = np.concatenate((all_audio, np.zeros((50, 1))), axis=0)
+            all_audio = np.concatenate((all_audio, transition), axis=0)
             inputs = processor(f"Coming up we have {title}", voice_preset=voice_preset)
             audio = model.generate(**inputs)
             audio = audio.cpu().numpy()
             audio = np.moveaxis(audio, -1, 0)
             all_audio = np.concatenate((all_audio, audio), axis=0)
-            all_audio = np.concatenate((all_audio, np.zeros((5, 1))), axis=0)
+            all_audio = np.concatenate((all_audio, np.zeros((50, 1))), axis=0)
         for i, line in enumerate(text.split('\n')):
             if line in ["", " ", "\n", " \n"]:
                 continue
