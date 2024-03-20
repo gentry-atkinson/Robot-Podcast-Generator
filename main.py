@@ -8,7 +8,6 @@ import torch
 import os
 from datetime import datetime
 import gc
-from datasets import load_dataset
 import numpy as np
 import random
 import scipy
@@ -18,6 +17,24 @@ from gen_music import generate_theme_song, generate_transistion_song
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(filename='Podcast Generator/logging.txt', level=logging.DEBUG)
+
+def break_text(orig_text: str) -> str:
+    """
+    Return a block of text with every line <= 256 character
+    """
+    new_text = ""
+    for line in orig_text.split('\n'):
+        if len(line) > 256:
+            break_points = list(range(256, len(line), 256))
+            for break_point in break_points:
+                while line[break_point] != ' ':
+                    break_point -= 1
+                line = line[:break_point] + '\n' + line[break_point+1:]
+        new_text += line
+        new_text += '\n'
+    print(new_text)
+    return new_text
+            
 
 if __name__ == "__main__":
     # Setup
@@ -97,7 +114,7 @@ if __name__ == "__main__":
         )
         script_segment = outputs[0]["generated_text"][-1]["content"]
         logger.info(f"{segment} generated. {len(script_segment)} characters")
-        script[segment] = script_segment
+        script[segment] = break_text(script_segment)
 
     with open(os.path.join("Podcast Generator", "scripts", f"{filename}.txt"), 'w+') as f:
         f.write('\n'.join(script.values()))
@@ -128,7 +145,7 @@ if __name__ == "__main__":
     all_audio = np.concatenate((all_audio, theme), axis=0)
 
     if not os.path.isfile(os.path.join("Podcast Generator", "tunes", "shortened_transition.npy")):
-        generate_theme_song()
+        generate_transistion_song()
     transition = np.load(os.path.join("Podcast Generator", "tunes", "shortened_transition.npy"))
     #Channels last
     if theme.ndim != 2:
