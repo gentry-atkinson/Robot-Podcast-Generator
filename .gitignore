@@ -1,5 +1,6 @@
 scripts/*
-episode_audio/*
+episode_audio/*.wav
+episode_audio/*.npy
 tunes/*
 **.pyc
 logging.txt

@@ -41,6 +41,10 @@ Having said that:
 Anecdotally, this program takes about 12 hours to run on an 8-core CPU with an
 RTX 4070. Your milage may vary.
 
+I have added some sample output mp3s to this directory. Since development on this
+project is ongoing, these samples are not necesarily good examples of the current
+output of the systemn. 
+
 ## ToDo
 - Outro tune
 - Settle on one Bark voice preset
@@ -50,4 +54,6 @@ RTX 4070. Your milage may vary.
 - More eloquent line splitting
 - Generate visual art for show
 - Review sound quality (reported "ringing")
+- Auto generate file tree (scripts, tunes, and episode_audio)
+- Squelch naming issues
 - RSS feed
