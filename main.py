@@ -153,14 +153,14 @@ if __name__ == "__main__":
     for title, text in script.items():
         logger.info(f"Reading segment {title}")
         if title != "Introduction":
-            all_audio = np.concatenate((all_audio, np.zeros((50, 1))), axis=0)
+            all_audio = np.concatenate((all_audio, np.zeros((25, 1))), axis=0)
             all_audio = np.concatenate((all_audio, transition), axis=0)
             inputs = processor(f"Coming up we have {title}", voice_preset=voice_preset)
             audio = model.generate(**inputs)
             audio = audio.cpu().numpy()
             audio = np.moveaxis(audio, -1, 0)
             all_audio = np.concatenate((all_audio, audio), axis=0)
-            all_audio = np.concatenate((all_audio, np.zeros((50, 1))), axis=0)
+            all_audio = np.concatenate((all_audio, np.zeros((25, 1))), axis=0)
         for i, line in enumerate(text.split('\n')):
             if line in ["", " ", "\n", " \n"] or not any([c.isalpha() for c in line]):
                 continue
