@@ -18,9 +18,10 @@ def gen_cover_art(device: str):
     )
     pipe = pipe.to(device)
 
-    prompt = "Generate cover art for a science focused podcast called No Humans Were Involved with this Podcast. The cover art should be bright and eye catching."
+    prompt = "Generate cover art for a science-focused podcast called No Humans Were Involved with this Podcast. The cover art should be bright and eye catching."
     
     image = pipe(prompt=prompt).images[0]
+    image = image.resize((1400, 1400))
     image.save(os.path.join("Robot-Podcast-Generator", "imgs", "cover.png"))
 
 if __name__ == "__main__":
