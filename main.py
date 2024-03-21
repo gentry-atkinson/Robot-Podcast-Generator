@@ -49,6 +49,14 @@ if __name__ == "__main__":
     title_prompt = "Generate a title for one episode of a podcast that is named 'No Humans Were Involved with This Podcast'. This podcast is about AI and society. The title should be short and humorous."
     script = {}
 
+    #Add sub-directories if needed
+    if not os.path.exists(os.path.join("Robot-Podcast-Generator", "episode_audio")):
+        os.mkdiros.path.join("Robot-Podcast-Generator", "episode_audio")
+    if not os.path.exists(os.path.join("Robot-Podcast-Generator", "tunes")):
+        os.mkdiros.path.join("Robot-Podcast-Generator", "tunes")
+    if not os.path.exists(os.path.join("Robot-Podcast-Generator", "scripts")):
+        os.mkdiros.path.join("Robot-Podcast-Generator", "scripts")
+
     # This isn't necesary. I just think it's neat.
     torch.cuda.init()
 
