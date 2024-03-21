@@ -16,7 +16,7 @@ import logging
 from gen_music import generate_theme_song, generate_transistion_song
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(filename='Podcast Generator/logging.txt', level=logging.DEBUG)
+logging.basicConfig(filename='Robot-Podcast-Generator/logging.txt', level=logging.DEBUG)
 
 def break_text(orig_text: str) -> str:
     """
@@ -92,7 +92,7 @@ if __name__ == "__main__":
 
     for segment in segments:
 
-        with open(os.path.join("Podcast Generator", "prompts", f"{segment}_prompt.txt")) as f:
+        with open(os.path.join("Robot-Podcast-Generator", "prompts", f"{segment}_prompt.txt")) as f:
             input_text = f.read()
         input_text = input_text.replace("{title}", title)
         messages = [
@@ -115,7 +115,7 @@ if __name__ == "__main__":
         logger.info(f"{segment} generated. {len(script_segment)} characters")
         script[segment] = break_text(script_segment)
 
-    with open(os.path.join("Podcast Generator", "scripts", f"{filename}.txt"), 'w+') as f:
+    with open(os.path.join("Robot-Podcast-Generator", "scripts", f"{filename}.txt"), 'w+') as f:
         f.write('\n'.join(script.values()))
     #print(f"Script finished. Total length: {len(script.split(' '))} words")
     logger.info("Script finished.")
@@ -135,17 +135,17 @@ if __name__ == "__main__":
     all_audio = np.zeros((50, 1))
     # original was speaker 6
     voice_preset = "v2/en_speaker_2"
-    if not os.path.isfile(os.path.join("Podcast Generator", "tunes", "shortened_themesong.npy")):
+    if not os.path.isfile(os.path.join("Robot-Podcast-Generator", "tunes", "shortened_themesong.npy")):
         generate_theme_song()
-    theme = np.load(os.path.join("Podcast Generator", "tunes", "shortened_themesong.npy"))
+    theme = np.load(os.path.join("Robot-Podcast-Generator", "tunes", "shortened_themesong.npy"))
     #Channels last
     if theme.ndim != 2:
         theme = np.reshape(theme, (len(theme), 1))
     all_audio = np.concatenate((all_audio, theme), axis=0)
 
-    if not os.path.isfile(os.path.join("Podcast Generator", "tunes", "shortened_transition.npy")):
+    if not os.path.isfile(os.path.join("Robot-Podcast-Generator", "tunes", "shortened_transition.npy")):
         generate_transistion_song()
-    transition = np.load(os.path.join("Podcast Generator", "tunes", "shortened_transition.npy"))
+    transition = np.load(os.path.join("Robot-Podcast-Generator", "tunes", "shortened_transition.npy"))
     #Channels last
     if transition.ndim != 2:
         transition = np.reshape(transition, (len(transition), 1))
@@ -176,9 +176,9 @@ if __name__ == "__main__":
 
     # Save audio as wav and as numpy just in case
     sample_rate = model.generation_config.sample_rate
-    np.save(os.path.join("Podcast Generator", "episode_audio", f"{filename}.npy"), all_audio)
+    np.save(os.path.join("Robot-Podcast-Generator", "episode_audio", f"{filename}.npy"), all_audio)
     scipy.io.wavfile.write(
-        os.path.join("Podcast Generator", "episode_audio", f"{filename}.wav"), 
+        os.path.join("Robot-Podcast-Generator", "episode_audio", f"{filename}.wav"), 
         rate=sample_rate, data=all_audio.astype(np.float32)
     )
     logger.info("Audio Saved")
