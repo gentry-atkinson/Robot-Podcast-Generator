@@ -37,9 +37,8 @@ def break_text(orig_text: str) -> str:
 
 if __name__ == "__main__":
     # Setup
-    USE_CPU = False
 
-    if torch.cuda.is_available() and not USE_CPU:
+    if torch.cuda.is_available():
         device = "cuda"
     else:
         device = "cpu"
@@ -56,6 +55,8 @@ if __name__ == "__main__":
         os.mkdiros.path.join("Robot-Podcast-Generator", "tunes")
     if not os.path.exists(os.path.join("Robot-Podcast-Generator", "scripts")):
         os.mkdiros.path.join("Robot-Podcast-Generator", "scripts")
+    if not os.path.exists(os.path.join("Robot-Podcast-Generator", "imgs")):
+        os.mkdiros.path.join("Robot-Podcast-Generator", "imgs")
 
     # This isn't necesary. I just think it's neat.
     torch.cuda.init()
