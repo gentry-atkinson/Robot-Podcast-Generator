@@ -182,6 +182,15 @@ if __name__ == "__main__":
             all_audio = np.concatenate((all_audio, np.zeros((5, 1))), axis=0)
             logger.info(f"Line {i} read")
 
+    #Add the outro song
+    if not os.path.isfile(os.path.join("Robot-Podcast-Generator", "tunes", "shortened_outro.npy")):
+        generate_transistion_song()
+    outro = np.load(os.path.join("Robot-Podcast-Generator", "tunes", "shortened_outro.npy"))
+    #Channels last
+    if outro.ndim != 2:
+        outro = np.reshape(outro, (len(outro), 1))
+    all_audio = np.concatenate((all_audio, outro), axis=0)
+
     # Save audio as wav and as numpy just in case
     sample_rate = model.generation_config.sample_rate
     np.save(os.path.join("Robot-Podcast-Generator", "episode_audio", f"{filename}.npy"), all_audio)
