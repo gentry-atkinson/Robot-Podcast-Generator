@@ -50,13 +50,13 @@ if __name__ == "__main__":
 
     #Add sub-directories if needed
     if not os.path.exists(os.path.join("Robot-Podcast-Generator", "episode_audio")):
-        os.mkdiros.path.join("Robot-Podcast-Generator", "episode_audio")
+        os.mkdir(os.path.join("Robot-Podcast-Generator", "episode_audio"))
     if not os.path.exists(os.path.join("Robot-Podcast-Generator", "tunes")):
-        os.mkdiros.path.join("Robot-Podcast-Generator", "tunes")
+        os.mkdir(os.path.join("Robot-Podcast-Generator", "tunes"))
     if not os.path.exists(os.path.join("Robot-Podcast-Generator", "scripts")):
-        os.mkdiros.path.join("Robot-Podcast-Generator", "scripts")
+        os.mkdir(os.path.join("Robot-Podcast-Generator", "scripts"))
     if not os.path.exists(os.path.join("Robot-Podcast-Generator", "imgs")):
-        os.mkdiros.path.join("Robot-Podcast-Generator", "imgs")
+        os.mkdir(os.path.join("Robot-Podcast-Generator", "imgs"))
 
     # This isn't necesary. I just think it's neat.
     torch.cuda.init()
